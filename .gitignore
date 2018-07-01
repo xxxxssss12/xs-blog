@@ -1,0 +1,16 @@
+.idea
+out
+*.eml
+*.iml
+target
+.classpath
+.project
+.settings
+.iws
+*.jar
+*.class
+/bin/
+.springBeans
+/.gitignore
+*.gitignore
+/*.DS_Store
