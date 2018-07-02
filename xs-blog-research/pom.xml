@@ -14,6 +14,7 @@
     <artifactId>xs-blog-research</artifactId>
     <version>1.0-SNAPSHOT</version>
     <description>调研专用</description>
+    <packaging>pom</packaging>
 
     <modules>
         <module>research-config-client</module>

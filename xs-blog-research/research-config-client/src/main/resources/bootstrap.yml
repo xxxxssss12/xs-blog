@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: research-config-client
+  config:
+    discovery:
+      enabled: true
+      serviceId: xs-blog-config-server
+    profile: dev
+
+server:
+  port: 2210
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:1111/eureka/
