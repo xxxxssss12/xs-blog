@@ -7,9 +7,9 @@ spring:
       server:
         git:
           searchPaths: xs-blog
-          username: xxxxssss12
-          password:
-          uri: https://github.com/xxxxssss12/config-center.git
+#          username: xxxxssss12
+#          password:
+          uri: git@github.com:xxxxssss12/config-center.git
   application:
     name: xs-blog-config-server
 
