@@ -1,7 +1,11 @@
 package com.xs.research.config.client.dao;
 
 import com.xs.research.config.client.bean.User;
+import org.apache.ibatis.annotations.Mapper;
 
+import java.util.List;
+
+@Mapper
 public interface UserMapper {
     int deleteByPrimaryKey(Integer id);
 
@@ -14,4 +18,6 @@ public interface UserMapper {
     int updateByPrimaryKeySelective(User record);
 
     int updateByPrimaryKey(User record);
+
+    List<User> selectAllUser(int pageNum, int pageSize);
 }
