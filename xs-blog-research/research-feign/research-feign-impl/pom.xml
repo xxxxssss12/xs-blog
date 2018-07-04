@@ -6,14 +6,13 @@
 
     <parent>
         <groupId>xs.blog</groupId>
-        <artifactId>xs-blog-research</artifactId>
+        <artifactId>research-feign</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
     <groupId>xs.blog</groupId>
-    <artifactId>research-config-client</artifactId>
+    <artifactId>research-feign-impl</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <description>config-client调研</description>
 
     <dependencies>
         <dependency>
@@ -35,17 +34,9 @@
         </dependency>
         <dependency>
             <groupId>xs.blog</groupId>
-            <artifactId>xs-blog-plugins-utils</artifactId>
+            <artifactId>research-feign-api</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.mybatis.generator</groupId>
-                <artifactId>mybatis-generator-maven-plugin</artifactId>
-                <version>1.3.5</version>
-            </plugin>
-        </plugins>
-    </build>
+
 </project>
