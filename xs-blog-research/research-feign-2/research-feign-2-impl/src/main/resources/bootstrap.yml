@@ -1,6 +1,6 @@
 spring:
   application:
-    name: research-config-client
+    name: research-feign-2
   config:
     discovery:
       enabled: true
@@ -13,10 +13,10 @@ spring:
         service-id: xs-blog-config-server
       profile: default
       label: master
-      name: research-config-client,mybatis-mac
+      name: research-feign-2,mybatis-mac
 
 server:
-  port: 2210
+  port: 2220
 
 eureka:
   client:

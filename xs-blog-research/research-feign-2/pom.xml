@@ -6,19 +6,18 @@
 
     <parent>
         <groupId>xs.blog</groupId>
-        <artifactId>xs-blog</artifactId>
+        <artifactId>xs-blog-research</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
     <groupId>xs.blog</groupId>
-    <artifactId>xs-blog-research</artifactId>
+    <artifactId>research-feign-2</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <description>调研专用</description>
+    <description>feign服务</description>
     <packaging>pom</packaging>
 
     <modules>
-        <module>research-config-client</module>
-        <module>research-feign</module>
-        <module>research-feign-2</module>
+        <module>research-feign-2-api</module>
+        <module>research-feign-2-impl</module>
     </modules>
 </project>
