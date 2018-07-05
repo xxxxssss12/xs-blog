@@ -1,8 +1,9 @@
 package xs.blog.research.feign2.bean;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class TestBean {
+public class TestBean implements Serializable {
     private Integer id;
 
     private String code;

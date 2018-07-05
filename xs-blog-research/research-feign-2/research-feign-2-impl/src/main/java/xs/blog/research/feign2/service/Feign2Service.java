@@ -37,6 +37,7 @@ public class Feign2Service implements Feign2ServiceApi {
     }
 
     @Override
+    @RequestMapping("/save")
     public Result save(TestBean bean) {
         return Result.buildSuccess(testBeanMapper.insert(bean));
     }

@@ -16,7 +16,7 @@ spring:
       name: research-feign-2,mybatis-mac
 
 server:
-  port: 2220
+  port: 2230
 
 eureka:
   client:

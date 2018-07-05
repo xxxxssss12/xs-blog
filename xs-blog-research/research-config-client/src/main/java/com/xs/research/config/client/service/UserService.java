@@ -1,14 +1,11 @@
 package com.xs.research.config.client.service;
 
-import com.github.pagehelper.PageHelper;
 import com.xs.research.config.client.bean.User;
 import com.xs.research.config.client.dao.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import xs.blog.utils.bean.Result;
-
-import java.util.List;
 
 @RestController
 @RequestMapping(value = "/user")
