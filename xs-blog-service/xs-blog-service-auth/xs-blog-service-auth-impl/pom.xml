@@ -20,5 +20,15 @@
             <artifactId>xs-blog-bootstrap</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>xs.blog</groupId>
+            <artifactId>xs-blog-service-auth-api</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>xs.blog</groupId>
+            <artifactId>xs-blog-plugins-mybatis</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 </project>

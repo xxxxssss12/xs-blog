@@ -24,6 +24,7 @@ public class Result implements Serializable {
         return rs != null && rs.getCode() != null && rs.getCode() > 0;
     }
 
+    public static Result hystrixFail() {return new Result(-1, "HYSTRIX_FALLBACK", "fail", null);}
     public static Result buildSuccess(Object obj) {
         return new Result(1,null,"success",obj);
     }
@@ -35,6 +36,9 @@ public class Result implements Serializable {
     }
     public static Result buildFail(String msg) {
         return new Result(-1,null,msg,null);
+    }
+    public static Result buildFail(String errorCode, String msg) {
+        return new Result(-1, errorCode, msg, null);
     }
     public Integer getCode() {
         return code;
