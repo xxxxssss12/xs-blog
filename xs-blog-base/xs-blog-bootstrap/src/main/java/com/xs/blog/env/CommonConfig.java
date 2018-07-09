@@ -3,6 +3,11 @@ package com.xs.blog.env;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.env.EnvironmentPostProcessor;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.PropertiesPropertySource;
+import org.springframework.stereotype.Component;
 import xs.blog.utils.YamlUtil;
 
 import java.io.File;
@@ -15,17 +20,21 @@ import java.util.regex.Pattern;
 /**
  * Created by xs on 2018/7/6
  */
-public class CommonConfig {
+@Component
+public class CommonConfig implements EnvironmentPostProcessor {
     private static final Logger LOG = LoggerFactory.getLogger(CommonConfig.class);
 
     private static String defaultConfigFilePath = "classpath:config-test/config.test.yml";
 
     private static final String sysProp_filePath = "blog.service.config.path";
+
     private static final String sysProp_serverId = "blog.service.id";
     private static final String sysProp_serverPort = "blog.service.port";
     private static final String sysProp_configName = "blog.service.config.name";
+
     private static final String springConfigServerName = "spring.application.name";
     private static final String springConfigServerPort = "server.port";
+    private static final String springConfigName = "spring.cloud.config.name";
 
     private static Properties prop = new Properties();
 
@@ -37,7 +46,6 @@ public class CommonConfig {
     public static void init(String[] args) {
         Properties sysProp = System.getProperties();
         String filePathStr = sysProp.getProperty(sysProp_filePath, defaultConfigFilePath);
-        String configName = sysProp.getProperty(sysProp_configName);
         if (!StringUtils.isEmpty(filePathStr)) {
             // 加载配置文件
             String[] filePaths = filePathStr.split(";");
@@ -58,9 +66,14 @@ public class CommonConfig {
             prop.put(sysProp_serverPort, serverPort);
             prop.put(springConfigServerPort, serverPort);
         }
+        String configName = sysProp.getProperty(sysProp_configName);
+        if (!StringUtils.isEmpty(configName)) {
+            sysProp.put(springConfigName, configName);
+            prop.put(sysProp_configName, configName);
+            prop.put(springConfigName, configName);
+        }
         assertLostParams();
-        createBootStrapProp();
-//        replaceEl();
+        replaceEl();
     }
 
     private static void createBootStrapProp() {
@@ -109,7 +122,7 @@ public class CommonConfig {
     private static void replaceEl() {
         String regex = "\\$\\{[^}]+}";
         Pattern pattern = Pattern.compile(regex);
-        Properties prop = System.getProperties();
+        Properties sysProp = System.getProperties();
 
         for (String key : prop.stringPropertyNames()) {
             String value = prop.getProperty(key);
@@ -119,6 +132,9 @@ public class CommonConfig {
                 String match = matcher.group();
                 String propKey = match.substring(2, match.length()-1);
                 String replaceValue = prop.getProperty(propKey);
+                if (StringUtils.isEmpty(replaceValue)) {
+                    replaceValue = sysProp.getProperty(propKey);
+                }
                 if (replaceValue == null) {
                     replaceValue = "";
                 } else {
@@ -126,7 +142,15 @@ public class CommonConfig {
                 }
                 newValue = newValue.replace(match, replaceValue);
             }
-            if (!value.equals(newValue)) System.out.println(value + "--->" + newValue);
+            if (!value.equals(newValue)) {
+                System.out.println(value + "--->" + newValue);
+                if (key.equals(springConfigName)) sysProp.put(springConfigName, newValue);
+                if (key.equals(springConfigServerPort)) sysProp.put(springConfigServerPort, newValue);
+                if (key.equals(springConfigServerName)) sysProp.put(springConfigServerName, newValue);
+                if (key.equals(sysProp_configName)) sysProp.put(sysProp_configName, newValue);
+                if (key.equals(sysProp_serverId)) sysProp.put(sysProp_serverId, newValue);
+                if (key.equals(sysProp_serverPort)) sysProp.put(sysProp_serverPort, newValue);
+            }
             prop.put(key, newValue);
         }
     }
@@ -172,5 +196,17 @@ public class CommonConfig {
             return new Properties();
         }
         return properties;
+    }
+
+    @Override
+    public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
+        try {
+
+            PropertiesPropertySource propertiesPropertySource = new PropertiesPropertySource("blogCommon", prop);
+            environment.getPropertySources().addLast(propertiesPropertySource);
+            LOG.info("CommonConfig...postProcessEnvironment end!配置文件加载完毕");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

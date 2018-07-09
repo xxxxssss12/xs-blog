@@ -1,8 +1,8 @@
 server:
-  port: 8800
+  port: 2240
 spring:
   application:
-    name: research-feign
+    name: research-haha
   config:
     profile: default
     discovery:
@@ -15,7 +15,7 @@ spring:
         service-id: xs-blog-config-server
       profile: default
       label: master
-      name: ${spring.application.name},mybatis-macs
+      name: ${spring.application.name},mybatis-mac
 
 eureka:
   client:
@@ -24,4 +24,4 @@ eureka:
 
 logging:
   level:
-    root: debug
+    root: info
