@@ -8,7 +8,7 @@ spring:
         git:
           searchPaths: xs-blog
           username: xxxxssss12
-          password:
+          password: wdmmwrz123
           #uri: git@github.com:xxxxssss12/config-center.git
           uri: https://github.com/xxxxssss12/config-center.git
   application:

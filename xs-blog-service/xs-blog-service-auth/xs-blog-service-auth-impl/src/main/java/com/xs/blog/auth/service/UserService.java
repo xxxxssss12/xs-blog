@@ -4,6 +4,7 @@ import com.xs.blog.auth.bean.User;
 import com.xs.blog.auth.dao.UserMapper;
 import com.xs.blog.auth.feign.UserServiceApi;
 import com.xs.blog.auth.util.PwdUtil;
+import com.xs.blog.redis.JedisConnector;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,6 +32,8 @@ public class UserService implements UserServiceApi {
     @Override
     @RequestMapping("/authPwd")
     public Result authPwd(String username, String password) {
+        JedisConnector.set("hahaha", "1");
+        System.out.println(JedisConnector.get("hahaha"));
         User user = getByUsername(username);
         if (user == null) return Result.buildFail("USER_0001","用户不存在");
         if (PwdUtil.isEquals(password, user.getPassword())) return Result.buildFail("USER_0002", "用户密码不匹配");

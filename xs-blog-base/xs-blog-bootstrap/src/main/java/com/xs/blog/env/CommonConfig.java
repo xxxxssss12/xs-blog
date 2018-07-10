@@ -44,6 +44,7 @@ public class CommonConfig implements EnvironmentPostProcessor {
      * @param args
      */
     public static void init(String[] args) {
+        LOG.info("prop start init!");
         Properties sysProp = System.getProperties();
         String filePathStr = sysProp.getProperty(sysProp_filePath, defaultConfigFilePath);
         if (!StringUtils.isEmpty(filePathStr)) {
@@ -74,6 +75,7 @@ public class CommonConfig implements EnvironmentPostProcessor {
         }
         assertLostParams();
         replaceEl();
+        LOG.info("prop start end!");
     }
 
     private static void createBootStrapProp() {
@@ -98,9 +100,6 @@ public class CommonConfig implements EnvironmentPostProcessor {
     }
     private static void assertLostParams() {
         Properties sysProp = System.getProperties();
-        for (String key : sysProp.stringPropertyNames()) {
-            System.out.println("systemProp:" + key + "=" + sysProp.getProperty(key));
-        }
         String serverIdProp = sysProp.getProperty(springConfigServerName);
         String serverPortProp = sysProp.getProperty(springConfigServerPort);
         if (StringUtils.isEmpty(serverIdProp) || StringUtils.isEmpty(serverPortProp)) {
@@ -163,7 +162,7 @@ public class CommonConfig implements EnvironmentPostProcessor {
         if (filePath.startsWith("classpath:")) {
             filePath = CommonConfig.class.getResource("/").getPath() + filePath.replace("classpath:", "");
         }
-        LOG.info("filePath=" + filePath);
+        System.out.println("filePath=" + filePath);
         singleProp.putAll(laodDir(new File(filePath)));
 //        System.getProperties().putAll(singleProp);
         return singleProp;
@@ -201,7 +200,7 @@ public class CommonConfig implements EnvironmentPostProcessor {
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
         try {
-
+            if (prop == null || prop.isEmpty()) init(null);
             PropertiesPropertySource propertiesPropertySource = new PropertiesPropertySource("blogCommon", prop);
             environment.getPropertySources().addLast(propertiesPropertySource);
             LOG.info("CommonConfig...postProcessEnvironment end!配置文件加载完毕");

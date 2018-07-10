@@ -1,0 +1,54 @@
+<configuration debug="false" scan="false" scanPeriod="10 seconds">
+
+    <property name="log.root" value="~/logs"/>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <pattern>%-15(%d{HH:mm:ss.SSS}) [%t] %-5level %logger{80} -%msg%n</pattern>
+        </layout>
+    </appender>
+
+    <appender name="SIFT" class="ch.qos.logback.classic.sift.SiftingAppender">
+        <discriminator>
+            <key>module</key>
+            <defaultValue>module</defaultValue>
+        </discriminator>
+        <sift>
+            <appender name="FILE-${module}" class="ch.qos.logback.core.rolling.RollingFileAppender">
+                <Encoding>UTF-8</Encoding>
+                <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                    <FileNamePattern>${log.root}/${module}/${module}.%d{yyyy-MM-dd}.log</FileNamePattern>
+                </rollingPolicy>
+                <layout class="ch.qos.logback.classic.PatternLayout">
+                    <pattern>%-15(%d{HH:mm:ss.SSS}) [%t] %-5level %logger{80} -%msg%n</pattern>
+                </layout>
+            </appender>
+        </sift>
+    </appender>
+
+    <root level="info">
+        <appender-ref ref="STDOUT"/>
+    </root>
+
+    <logger name="com.wecash" level="info" additivity="false">
+        <appender-ref ref="STDOUT" />
+    </logger>
+    <logger name="org.springframework" level="error" additivity="false">
+        <appender-ref ref="STDOUT" />
+    </logger>
+
+    <logger name="com.alibaba.dubbo.registry" level="error" additivity="false">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+
+    <logger name="com.alibaba.dubbo.config" level="error" additivity="false">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+    <logger name="com.alibaba.dubbo.common" level="error" additivity="false">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+    <logger name="ch.qos.logback.classic" level="info" additivity="false">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+
+</configuration>
