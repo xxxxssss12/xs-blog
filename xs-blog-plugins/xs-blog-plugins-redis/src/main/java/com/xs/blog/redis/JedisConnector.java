@@ -2,8 +2,8 @@ package com.xs.blog.redis;
 
 import com.xs.blog.logging.LoggerWithMDC;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
@@ -17,44 +17,58 @@ import java.util.Set;
  * Created by xs on 2018/7/10
  */
 @Component
-@ConfigurationProperties(prefix = "jedis")
 public class JedisConnector {
     private static LoggerWithMDC logger = LoggerWithMDC.getLogger(JedisConnector.class,"redis");
 
     private static JedisPool pool;
-    @Value("${pool.maxActive}")
+
     private static Integer poolMaxActive;
-    @Value("${pool.maxIdle}")
     private static Integer poolMaxIdle;
-    @Value("${pool.testOnBorrow}")
     private static Boolean poolTestOnBorrow;
-    @Value("${pool.testOnReturn}")
     private static Boolean poolTestOnReturn;
-    @Value("${pool.timeout}")
     private static Integer poolTimeout;
-    @Value("${ip}")
     private static String ip;
-    @Value("${port}")
     private static Integer port;
-    @Value("${password}")
     private static String password;
 
-    static {
-//        JedisPoolConfig config = new JedisPoolConfig();
-//        config.setMaxTotal(Integer.valueOf(FundamentalConfigProvider.get("redis.pool.maxActive","1024")));
-//        config.setMaxIdle(Integer.valueOf(FundamentalConfigProvider.get("redis.pool.maxIdle","200")));
-////        config.setMaxWait(Long.valueOf(FundamentalConfigProvider.get("redis.pool.maxWait")));
-//        config.setTestOnBorrow(Boolean.valueOf(FundamentalConfigProvider.get("redis.pool.testOnBorrow")));
-//        config.setTestOnReturn(Boolean.valueOf(FundamentalConfigProvider.get("redis.pool.testOnReturn")));
-//
-//        pool = new JedisPool(config
-//                , FundamentalConfigProvider.get("redis.ip")
-//                , Integer.valueOf(FundamentalConfigProvider.get("redis.port"))
-//                , Integer.parseInt(FundamentalConfigProvider.get("redis.pool.timeout", "2000"))
-//                , FundamentalConfigProvider.get("redis.password", null));
-//
-//        logger.info("redis.ip: " + FundamentalConfigProvider.get("redis.ip"));
-//        expire = Integer.valueOf(FundamentalConfigProvider.get("redis.expire"));
+    @Value("${jedis.pool.maxActive}")
+    public void setPoolMaxActive(Integer poolMaxActive) {
+        JedisConnector.poolMaxActive = poolMaxActive;
+    }
+
+    @Value("${jedis.pool.maxIdle}")
+    public void setPoolMaxIdle(Integer poolMaxIdle) {
+        JedisConnector.poolMaxIdle = poolMaxIdle;
+    }
+
+    @Value("${jedis.pool.testOnBorrow}")
+    public void setPoolTestOnBorrow(Boolean poolTestOnBorrow) {
+        JedisConnector.poolTestOnBorrow = poolTestOnBorrow;
+    }
+
+    @Value("${jedis.pool.testOnReturn}")
+    public void setPoolTestOnReturn(Boolean poolTestOnReturn) {
+        JedisConnector.poolTestOnReturn = poolTestOnReturn;
+    }
+
+    @Value("${jedis.pool.timeout}")
+    public void setPoolTimeout(Integer poolTimeout) {
+        JedisConnector.poolTimeout = poolTimeout;
+    }
+
+    @Value("${jedis.ip}")
+    public void setIp(String ip) {
+        JedisConnector.ip = ip;
+    }
+
+    @Value("${jedis.port}")
+    public void setPort(Integer port) {
+        JedisConnector.port = port;
+    }
+
+    @Value("${jedis.password}")
+    public void setPassword(String password) {
+        JedisConnector.password = password;
     }
 
     public JedisConnector() {}
@@ -65,16 +79,20 @@ public class JedisConnector {
     }
 
     public static JedisPool getPool() {
-        logger.info("jedisConnector init start!");
         if (pool == null) {
             synchronized (JedisConnector.class) {
                 if (pool == null) {
+                    logger.info("jedisConnector init start!");
                     JedisPoolConfig config = new JedisPoolConfig();
                     config.setMaxTotal(poolMaxActive);
                     config.setMaxIdle(poolMaxIdle);
                     config.setTestOnBorrow(poolTestOnBorrow);
                     config.setTestOnReturn(poolTestOnReturn);
-                    pool = new JedisPool(config, ip, port, poolTimeout, password);
+                    if (StringUtils.isEmpty(password)) {
+                        pool = new JedisPool(config, ip, port, poolTimeout);
+                    } else {
+                        pool = new JedisPool(config, ip, port, poolTimeout, password);
+                    }
                     logger.info("jedisConnector init over!host={}:{}", ip, port);
                 }
             }
@@ -85,7 +103,7 @@ public class JedisConnector {
     public static boolean set(String key,String value){
         Jedis jedis = null;
         try{
-            jedis=pool.getResource();
+            jedis=getJedis();
             String result = jedis.set(key,value);
             if (result.equals("OK")){
                 return true;
@@ -103,7 +121,7 @@ public class JedisConnector {
     public static boolean set(String key,int expire,String value){
         Jedis jedis = null;
         try{
-            jedis=pool.getResource();
+            jedis=getJedis();
             String result = jedis.setex(key,expire,value);
             if (result.equals("OK")){
                 return true;
@@ -120,7 +138,7 @@ public class JedisConnector {
     public static boolean set(String key, String value, String nxxx, String expx, int time){
         Jedis jedis = null;
         try{
-            jedis=pool.getResource();
+            jedis=getJedis();
             String result = jedis.set(key,value,nxxx,expx,time);
             if (result.equals("OK")){
                 return true;
@@ -141,7 +159,7 @@ public class JedisConnector {
         Jedis jedis = null;
         String result = null;
         try{
-            jedis=pool.getResource();
+            jedis=getJedis();
             result = jedis.get(key);
         }catch (Exception e){
             logger.error(e);
@@ -156,7 +174,7 @@ public class JedisConnector {
         Jedis jedis =null;
         Set<String> result = null;
         try{
-            jedis=pool.getResource();
+            jedis=getJedis();
             result = jedis.keys(pattern);
         }catch (Exception e){
             logger.error(e);
@@ -171,7 +189,7 @@ public class JedisConnector {
     public static boolean del(String key){
         Jedis jedis = null;
         try{
-            jedis=pool.getResource();
+            jedis=getJedis();
             if(jedis.del(key)>0){
                 return true;
             }else{
@@ -189,7 +207,7 @@ public class JedisConnector {
     public static boolean exists(String key){
         Jedis jedis = null;
         try{
-            jedis=pool.getResource();
+            jedis=getJedis();
             return jedis.exists(key);
         }catch (Exception e){
             logger.error(e);
@@ -210,7 +228,7 @@ public class JedisConnector {
     public static Long  lpush(String key,String value){
         Jedis jedis = null;
         try{
-            jedis=pool.getResource();
+            jedis=getJedis();
             return   jedis.lpush(key, value);
         }catch (Exception e){
             logger.error(e);
@@ -231,7 +249,7 @@ public class JedisConnector {
     public static Long rpush(String key,String value){
         Jedis jedis = null;
         try{
-            jedis=pool.getResource();
+            jedis=getJedis();
             return   jedis.rpush(key, value);
         }catch (Exception e){
             logger.error(e);
@@ -251,7 +269,7 @@ public class JedisConnector {
     public static String lpop(String key){
         Jedis jedis = null;
         try{
-            jedis=pool.getResource();
+            jedis=getJedis();
             return   jedis.lpop(key);
         }catch (Exception e){
             logger.error(e);
@@ -271,7 +289,7 @@ public class JedisConnector {
     public static String rpop(String key){
         Jedis jedis = null;
         try{
-            jedis=pool.getResource();
+            jedis=getJedis();
             return   jedis.rpop(key);
         }catch (Exception e){
             logger.error(e);
@@ -291,7 +309,7 @@ public class JedisConnector {
     public static Long llen(String key){
         Jedis jedis = null;
         try{
-            jedis=pool.getResource();
+            jedis=getJedis();
             return   jedis.llen(key);
         }catch (Exception e){
             logger.error(e);
@@ -312,7 +330,7 @@ public class JedisConnector {
     public static void addSet(String key,String value){
         Jedis jedis = null;
         try{
-            jedis=pool.getResource();
+            jedis=getJedis();
             Long score = jedis.zcard(key);
             jedis.zadd(key, ++score, value);
         }catch (Exception e){
@@ -332,7 +350,7 @@ public class JedisConnector {
     public static Set<String> getSet(String key){
         Jedis jedis = null;
         try{
-            jedis=pool.getResource();
+            jedis=getJedis();
             Set<String> sets = jedis.zrange(key, 0, -1);
             return  sets;
         }catch (Exception e){
@@ -347,7 +365,7 @@ public class JedisConnector {
     public static String loadScript(String script){
         Jedis jedis = null;
         try{
-            jedis=pool.getResource();
+            jedis=getJedis();
             return  jedis.scriptLoad(script);
         }catch (Exception e){
             logger.error(e);
@@ -368,7 +386,7 @@ public class JedisConnector {
     public static Set<String> zrange(String key, int size) {
         Jedis jedis =null;
         try{
-            jedis=pool.getResource();
+            jedis=getJedis();
             Set<String> sets = jedis.zrange(key, 0, size);
             return  sets;
         }catch (Exception e){
@@ -390,7 +408,7 @@ public class JedisConnector {
     public static Long zrem(String key, String... values) {
         Jedis jedis =null;
         try{
-            jedis=pool.getResource();
+            jedis=getJedis();
             Long count = jedis.zrem(key, values);
             return  count;
         }catch (Exception e){
@@ -405,7 +423,7 @@ public class JedisConnector {
     public static Map<String, String> hget(String key){
         Jedis jedis =null;
         try{
-            jedis=pool.getResource();
+            jedis=getJedis();
             return jedis.hgetAll(key);
         }catch (Exception e){
             logger.error(e);
@@ -419,7 +437,7 @@ public class JedisConnector {
     public static String hget(String key,String field){
         Jedis jedis =null;
         try{
-            jedis=pool.getResource();
+            jedis=getJedis();
             return jedis.hget(key, field);
         }catch (Exception e){
             logger.error(e);
@@ -433,7 +451,7 @@ public class JedisConnector {
     public static long hset(String key,String field,String value){
         Jedis jedis = null;
         try{
-            jedis=pool.getResource();
+            jedis=getJedis();
             return jedis.hset(key, field, value);
         }catch (Exception e){
             logger.error(e);
@@ -452,7 +470,7 @@ public class JedisConnector {
     public static long hset(String key,Map<String,String> fields){
         Jedis jedis =null;
         try{
-            jedis=pool.getResource();
+            jedis=getJedis();
             if(jedis.hmset(key, fields).equalsIgnoreCase("OK")){
                 return 0L;
             }
@@ -468,7 +486,7 @@ public class JedisConnector {
     public static long expire(String key, int expire){
         Jedis jedis = null;
         try{
-            jedis =pool.getResource();
+            jedis =getJedis();
             return jedis.expire(key, expire);
         }catch(Exception e){
             logger.error(e);
@@ -492,7 +510,7 @@ public class JedisConnector {
     public static long incr(String key){
         Jedis jedis = null;
         try{
-            jedis =pool.getResource();
+            jedis =getJedis();
             return jedis.incr(key);
         }catch(Exception e){
             logger.error(e);
@@ -516,7 +534,7 @@ public class JedisConnector {
     public static long decr(String key){
         Jedis jedis = null;
         try{
-            jedis =pool.getResource();
+            jedis =getJedis();
             return jedis.decr(key);
         }catch(Exception e){
             logger.error(e);
@@ -531,7 +549,7 @@ public class JedisConnector {
     public static long batchSet(List<String> keys, List<String> values){
         Jedis jedis = null;
         try{
-            jedis = pool.getResource();
+            jedis = getJedis();
             Pipeline pipeline = jedis.pipelined();
             for(int i=0; i< keys.size(); i++){
                 pipeline.set(keys.get(i), values.get(i));
@@ -553,7 +571,7 @@ public class JedisConnector {
      * @param count
      */
     public static void single(int count){
-        Jedis jedis = pool.getResource();
+        Jedis jedis = getJedis();
         for(int i=0; i<count; i++){
             jedis.set(i+"", 2*i + "");
         }
@@ -566,7 +584,7 @@ public class JedisConnector {
      * @param count
      */
     public static void batch(int count){
-        Jedis jedis = pool.getResource();
+        Jedis jedis = getJedis();
         Pipeline p = jedis.pipelined();
 
         for(int i=0; i<count; i++){
@@ -576,18 +594,18 @@ public class JedisConnector {
         jedis.close();
     }
 
-    public static Object eval(String script, List<String> keys, List<String> args) {
-        Jedis jedis = null;
-        try {
-            jedis = pool.getResource();
-            return jedis.eval(script, keys, args);
-        } catch (Exception e) {
-            logger.error(e);
-        } finally {
-            if (jedis != null) {
-                jedis.close();
-            }
-        }
-        return null;
-    }
+//    public static Object eval(String script, List<String> keys, List<String> args) {
+//        Jedis jedis = null;
+//        try {
+//            jedis = getJedis();
+//            return jedis.eval(script, keys, args);
+//        } catch (Exception e) {
+//            logger.error(e);
+//        } finally {
+//            if (jedis != null) {
+//                jedis.close();
+//            }
+//        }
+//        return null;
+//    }
 }

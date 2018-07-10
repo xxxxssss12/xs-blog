@@ -30,6 +30,14 @@ public class YamlUtil {
         }
         return null;
     }
+    public static Properties transToProp(InputStream stream) {
+        Yaml yaml = new Yaml();
+        Map<String, Object> result = yaml.load(stream);
+//            JSONObject result = JSON.parseObject(JSON.toJSONString( yaml.load(in)));
+        Properties prop = new Properties();
+        dfsResolve(result, null, prop);
+        return prop;
+    }
 
     private static void dfsResolve(Map<String, Object> tree, String keyPreffix, Properties prop) {
         for (Map.Entry<String, Object> entry : tree.entrySet()) {

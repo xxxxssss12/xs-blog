@@ -1,5 +1,6 @@
 package com.xs.blog.env;
 
+import com.xs.blog.logging.LoggerWithMDC;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,9 +23,9 @@ import java.util.regex.Pattern;
  */
 @Component
 public class CommonConfig implements EnvironmentPostProcessor {
-    private static final Logger LOG = LoggerFactory.getLogger(CommonConfig.class);
+    private static final LoggerWithMDC LOG = LoggerWithMDC.getLogger(CommonConfig.class, "CommonConfig");
 
-    private static String defaultConfigFilePath = "classpath:config-test/config.test.yml";
+    private static String defaultConfigFilePath = "classpath:/config-test/config.test.yml";
 
     private static final String sysProp_filePath = "blog.service.config.path";
 
@@ -159,11 +160,18 @@ public class CommonConfig implements EnvironmentPostProcessor {
     }
     private static Properties resolveFileAddProp(String filePath, Properties prop) {
         Properties singleProp = new Properties();
-        if (filePath.startsWith("classpath:")) {
-            filePath = CommonConfig.class.getResource("/").getPath() + filePath.replace("classpath:", "");
-        }
         System.out.println("filePath=" + filePath);
-        singleProp.putAll(laodDir(new File(filePath)));
+        if (filePath.startsWith("classpath:")) {
+            // classpath不支持多个文件加载
+            filePath = filePath.replace("classpath:", "");
+            try (InputStream in = CommonConfig.class.getResourceAsStream(filePath)) {
+                singleProp = resolveYmlStream(in);
+            } catch (Exception e) {
+                LOG.error(e);
+            }
+        } else {
+            singleProp.putAll(laodDir(new File(filePath)));
+        }
 //        System.getProperties().putAll(singleProp);
         return singleProp;
     }
@@ -189,6 +197,13 @@ public class CommonConfig implements EnvironmentPostProcessor {
         return prop;
     }
 
+    private static Properties resolveYmlStream(InputStream stream) {
+        Properties properties = YamlUtil.transToProp(stream);
+        if (properties == null) {
+            return new Properties();
+        }
+        return properties;
+    }
     private static Properties resolveYmlFile(File file) {
         Properties properties = YamlUtil.transToProp(file);
         if (properties == null) {

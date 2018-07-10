@@ -14,9 +14,11 @@ public class ConfigTest {
 
     @Value("${spring.datasource.url}")
     private String config;
-
+    @Value("${spring.datasource.name}")
+    private static String a;
     @RequestMapping("/hi")
     public Result hi() {
+        System.out.println(a);
         return Result.buildSuccess(config);
     }
 }
