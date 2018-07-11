@@ -68,6 +68,7 @@ public class JedisConnector {
 
     @Value("${jedis.password}")
     public void setPassword(String password) {
+        if (StringUtils.isEmpty( password)) return;
         JedisConnector.password = password;
     }
 
